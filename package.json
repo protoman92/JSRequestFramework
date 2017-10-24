@@ -1,0 +1,31 @@
+{
+  "name": "jsrequestframework",
+  "version": "1.0.0",
+  "description": "JS-based request framework",
+  "main": ".dist/src/index.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
+  },
+  "author": "Hai Pham",
+  "license": "ISC",
+  "dependencies": {
+    "javascriptutilities": "^1.0.10"
+  },
+  "devDependencies": {
+    "@types/jest": "^21.1.4",
+    "jest": "^21.2.1",
+    "ts-jest": "^21.1.3"
+  }
+}

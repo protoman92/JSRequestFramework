@@ -1,0 +1,150 @@
+import { Observable } from 'rxjs';
+import { BuildableType, BuilderType, Try } from 'javascriptutilities';
+import { Filterables } from './Filterable';
+
+import {
+  Middleware,
+  SideEffectMiddleware,
+  TransformMiddleware,
+  MiddlewareFilterableType as Filterable,
+} from './Middleware';
+
+import { SideEffect, SideEffects } from './SideEffect';
+import { Transformer, Transformers } from './Transformer';
+
+export class MiddlewareManager<T extends Filterable> implements 
+  BuildableType<MiddlewareManagerBuilder<T>> 
+{
+  /**
+   * Get the global middleware identifier - which, if used to identify a
+   * middleware, allows it to bypass all filters.
+   * @returns string A string value.
+   */
+  public static get globalMWIdentifier(): string {
+    return 'hp_global_middleware';
+  }
+
+  public static builder<T extends Filterable>(): MiddlewareManagerBuilder<T> {
+    return new MiddlewareManagerBuilder();
+  }
+
+  sideEffects: SideEffectMiddleware<T>[];
+  transforms: TransformMiddleware<T>[];
+ 
+  constructor() {
+    this.sideEffects = [];
+    this.transforms = [];
+  }
+
+  public builder(): MiddlewareManagerBuilder<T> {
+    return MiddlewareManager.builder();
+  }
+
+  public cloneBuilder(): MiddlewareManagerBuilder<T> {
+    return this.builder().withBuildable(this);
+  }
+
+  /**
+   * Filter out unnecessary middlewares.
+   * @param  {T} obj The filterable object.
+   * @param  {Middleware<M>[]} middlewares An Array of middleware wrappers.
+   * @returns M An Array of middlewares.
+   */
+  public filterMiddlewares<M>(obj: T, middlewares: Middleware<M>[]): Middleware<M>[] {
+    let globalId = MiddlewareManager.globalMWIdentifier; 
+    let identifiers = middlewares.map(value => value.identifier);
+    let filtered = Filterables.filter(obj, identifiers);
+
+    let globalMiddlewares = middlewares
+      .filter(value => value.identifier === globalId);
+    
+    let filteredMiddlewares = middlewares
+      .filter(value => filtered.find(v => value.identifier === v) != undefined)
+      .filter(value => value.identifier !== globalId);
+
+    return globalMiddlewares.concat(filteredMiddlewares);
+  }
+
+  public filterTransforms(obj: T): TransformMiddleware<T>[] {
+    return this.filterMiddlewares(obj, this.transforms);
+  }
+
+  public filterSideEffects(obj: T): SideEffectMiddleware<T>[] {
+    return this.filterMiddlewares(obj, this.sideEffects);
+  }
+
+  /**
+   * Apply transform middlewares.
+   * @param  {T} obj The filterable object.
+   * @returns Observable An Observable instance.
+   */
+  public applyTransformers(obj: T): Observable<Try<T>> {
+    let middlewares = this.filterTransforms(obj).map(value => value.middleware);
+    return Transformers.applyTransformers(obj, middlewares);    
+  }
+
+  public applySideEffects(obj: T): void {
+    let middlewares = this.filterSideEffects(obj).map(value => value.middleware);
+    SideEffects.applySideEffects(obj, middlewares);
+  }
+}
+
+export class MiddlewareManagerBuilder<T extends Filterable> implements 
+  BuilderType<MiddlewareManager<T>>
+{
+  private manager: MiddlewareManager<T>;
+
+  constructor() {
+    this.manager = new MiddlewareManager();
+  }
+
+  public withTransforms(transforms: TransformMiddleware<T>[]): this {
+    this.manager.transforms = transforms;
+    return this;
+  }
+
+  public addTransforms(transforms: TransformMiddleware<T>[]): this {
+    return this.withTransforms(this.manager.transforms.concat(transforms));
+  }
+
+  public addTransform(transform: Transformer<T>, identifier: string): this {
+    this.manager.transforms.push(new Middleware(identifier, transform));
+    return this;
+  }
+
+  public addGlobalTransform(transform: Transformer<T>): this {
+    return this.addTransform(transform, MiddlewareManager.globalMWIdentifier);
+  }
+
+  public withSideEffects(sideEffects: SideEffectMiddleware<T>[]): this {
+    this.manager.sideEffects = sideEffects;
+    return this;
+  }
+
+  public addSideEffects(sideEffects: SideEffectMiddleware<T>[]): this {
+    return this.withSideEffects(this.manager.sideEffects.concat(sideEffects));
+  }
+
+  public addSideEffect(sideEffect: SideEffect<T>, identifier: string): this {
+    this.manager.sideEffects.push(new Middleware(identifier, sideEffect));
+    return this;
+  }
+
+  public addGlobalSideEffect(sideEffect: SideEffect<T>): this {
+    return this.addSideEffect(sideEffect, MiddlewareManager.globalMWIdentifier);
+  }
+
+  public withBuildable(buildable?: MiddlewareManager<T>): this {
+    if (buildable != undefined) {
+      return this
+        .withTransforms(buildable.transforms)
+        .withSideEffects(buildable.sideEffects);
+    } else {
+      return this;
+    }
+  }
+
+  public build(): MiddlewareManager<T> {
+    return this.manager;
+  }
+}
