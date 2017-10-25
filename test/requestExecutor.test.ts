@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Maybe, Try } from 'javascriptutilities';
+import { Try } from 'javascriptutilities';
 
 import {
   MiddlewareManager,
@@ -28,7 +28,7 @@ describe('Request executor should be correct', () => {
     /// When & Then
     executor.execute(previous, generator, perform)
       .doOnNext(v => expect(v.isFailure()).toBeTruthy())
-      .doOnNext(v => expect(Maybe.some(v.error).map(e => e.message).value).toBe('Error 1'))
+      .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
       .doOnNext(() => nextCount += 1)
       .doOnError(fail)
       .doOnCompleted(() => expect(nextCount).toBe(1))
@@ -49,7 +49,7 @@ describe('Request executor should be correct', () => {
     /// When & Then
     executor.execute(previous, generator, perform)
       .doOnNext(v => expect(v.isFailure()).toBeTruthy())
-      .doOnNext(v => expect(Maybe.some(v.error).map(e => e.message).value).toBe('Error 1'))
+      .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
       .doOnNext(() => nextCount += 1)
       .doOnError(fail)
       .doOnCompleted(() => expect(nextCount).toBe(1))
@@ -70,7 +70,7 @@ describe('Request executor should be correct', () => {
     /// When & Then
     executor.execute(previous, generator, perform)
       .doOnNext(v => expect(v.isFailure()).toBeTruthy())
-      .doOnNext(v => expect(Maybe.some(v.error).map(e => e.message).value).toBe('Error 1'))
+      .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
       .doOnNext(() => nextCount += 1)
       .doOnError(fail)
       .doOnCompleted(() => expect(nextCount).toBe(1))
@@ -120,7 +120,7 @@ describe('Request executor should be correct', () => {
     /// When & Then
     executor.execute(previous, generator, perform)
       .doOnNext(v => expect(v.isFailure()).toBeTruthy())
-      .doOnNext(v => expect(Maybe.some(v.error).map(e => e.message).value).toBe('Error 1'))
+      .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
       .doOnNext(() => nextCount += 1)
       .doOnError(fail)
       .doOnCompleted(() => expect(nextCount).toBe(requestCount))
@@ -149,7 +149,7 @@ describe('Request executor should be correct', () => {
     /// When
     executor2.execute(previous, generator, perform)
       .doOnNext(v => expect(v.isFailure()).toBeTruthy())
-      .doOnNext(v => expect(Maybe.some(v.error).map(e => e.message).value).toBe('Error 1'))
+      .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
       .doOnNext(() => nextCount += 1)
       .doOnError(fail)
       .doOnCompleted(done)

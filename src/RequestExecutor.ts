@@ -9,9 +9,25 @@ export function builder<Req extends RequestType>(): Builder<Req> {
   return new Builder();
 }
 
+export interface Type<Req extends RequestType> {
+
+  /**   
+   * Generate a request based on some previous result and execute it.
+   * @param  {Try<Prev>} previous
+   * @param  {RequestGenerator<Prev,Req>} generator
+   * @param  {RequestPerformer<Req,Res>} perform
+   * @returns Observable An Observable instance.
+   */
+  execute<Prev,Res>(
+    previous: Try<Prev>, 
+    generator: RequestGenerator<Prev,Req>,
+    perform: RequestPerformer<Req,Res>
+  ): Observable<Try<Res>>;
+}
+
 /// This class is used to execute requests. The associated generic specifies
 /// the type of request to be executed.
-export class Self<Req extends RequestType> implements BuildableType<Builder<Req>> {
+export class Self<Req extends RequestType> implements BuildableType<Builder<Req>>, Type<Req> {
   requestMiddlewareManager?: MiddlewareManager.Self<Req>;
 
   public builder(): Builder<Req> {

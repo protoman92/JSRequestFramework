@@ -3,9 +3,10 @@ import { MiddlewareFilterableType } from './Middleware';
 import * as MiddlewareManager from './MiddlewareManager';
 
 import * as RequestExecutor from './RequestExecutor';
+import * as RequestProcessor from './RequestProcessor';
 import { RequestGenerator, RequestGenerators } from './RequestGenerator';
 import { RequestPerformer, RequestPerformers } from './RequestPerformer';
-import { ResultProcessor } from './ResultProcessor';
+import { ResultProcessor, ResultProcessors } from './ResultProcessor';
 
 import { RequestType } from './Request';
 import { SideEffect, SideEffects } from './SideEffect';
@@ -22,8 +23,10 @@ export {
   RequestGenerators,
   RequestPerformer,
   RequestPerformers,
+  RequestProcessor,
   RequestType,
   ResultProcessor,
+  ResultProcessors,
   SideEffect,
   SideEffects,
   Transformer,
