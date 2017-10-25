@@ -12,9 +12,11 @@ import {
 import { SideEffect, SideEffects } from './SideEffect';
 import { Transformer, Transformers } from './Transformer';
 
-export class MiddlewareManager<T extends Filterable> implements 
-  BuildableType<MiddlewareManagerBuilder<T>> 
-{
+export function builder<T extends Filterable>(): Builder<T> {
+  return new Builder();
+}
+
+export class Self<T extends Filterable> implements BuildableType<Builder<T>> {
   /**
    * Get the global middleware identifier - which, if used to identify a
    * middleware, allows it to bypass all filters.
@@ -22,10 +24,6 @@ export class MiddlewareManager<T extends Filterable> implements
    */
   public static get globalMWIdentifier(): string {
     return 'hp_global_middleware';
-  }
-
-  public static builder<T extends Filterable>(): MiddlewareManagerBuilder<T> {
-    return new MiddlewareManagerBuilder();
   }
 
   sideEffects: SideEffectMiddleware<T>[];
@@ -36,11 +34,11 @@ export class MiddlewareManager<T extends Filterable> implements
     this.transforms = [];
   }
 
-  public builder(): MiddlewareManagerBuilder<T> {
-    return MiddlewareManager.builder();
+  public builder(): Builder<T> {
+    return builder();
   }
 
-  public cloneBuilder(): MiddlewareManagerBuilder<T> {
+  public cloneBuilder(): Builder<T> {
     return this.builder().withBuildable(this);
   }
 
@@ -51,7 +49,7 @@ export class MiddlewareManager<T extends Filterable> implements
    * @returns M An Array of middlewares.
    */
   public filterMiddlewares<M>(obj: T, middlewares: Middleware<M>[]): Middleware<M>[] {
-    let globalId = MiddlewareManager.globalMWIdentifier; 
+    let globalId = Self.globalMWIdentifier; 
     let identifiers = middlewares.map(value => value.identifier);
     let filtered = Filterables.filter(obj, identifiers);
 
@@ -89,13 +87,11 @@ export class MiddlewareManager<T extends Filterable> implements
   }
 }
 
-export class MiddlewareManagerBuilder<T extends Filterable> implements 
-  BuilderType<MiddlewareManager<T>>
-{
-  private manager: MiddlewareManager<T>;
+export class Builder<T extends Filterable> implements BuilderType<Self<T>> {
+  private manager: Self<T>;
 
   constructor() {
-    this.manager = new MiddlewareManager();
+    this.manager = new Self();
   }
 
   public withTransforms(transforms: TransformMiddleware<T>[]): this {
@@ -113,7 +109,7 @@ export class MiddlewareManagerBuilder<T extends Filterable> implements
   }
 
   public addGlobalTransform(transform: Transformer<T>): this {
-    return this.addTransform(transform, MiddlewareManager.globalMWIdentifier);
+    return this.addTransform(transform, Self.globalMWIdentifier);
   }
 
   public withSideEffects(sideEffects: SideEffectMiddleware<T>[]): this {
@@ -131,10 +127,10 @@ export class MiddlewareManagerBuilder<T extends Filterable> implements
   }
 
   public addGlobalSideEffect(sideEffect: SideEffect<T>): this {
-    return this.addSideEffect(sideEffect, MiddlewareManager.globalMWIdentifier);
+    return this.addSideEffect(sideEffect, Self.globalMWIdentifier);
   }
 
-  public withBuildable(buildable?: MiddlewareManager<T>): this {
+  public withBuildable(buildable?: Self<T>): this {
     if (buildable != undefined) {
       return this
         .withTransforms(buildable.transforms)
@@ -144,7 +140,7 @@ export class MiddlewareManagerBuilder<T extends Filterable> implements
     }
   }
 
-  public build(): MiddlewareManager<T> {
+  public build(): Self<T> {
     return this.manager;
   }
 }

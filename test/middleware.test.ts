@@ -4,7 +4,7 @@ import { Filter, MiddlewareFilterableType, MiddlewareManager } from './../src';
 describe('Middleware manager should be correct', () => {
   it('Global middlewares should bypass filters', () => {
     /// Setup
-    let globalId = MiddlewareManager.globalMWIdentifier;
+    let globalId = MiddlewareManager.Self.globalMWIdentifier;
     let external = 1;
 
     class Filterable implements MiddlewareFilterableType {
