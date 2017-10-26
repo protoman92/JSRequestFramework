@@ -1,8 +1,10 @@
 {
   "name": "jsrequestframework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JS-based request framework",
   "main": ".dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "typings": "./dist/src/index.d.ts",
   "scripts": {
     "test": "jest --coverage"
   },
@@ -19,7 +21,7 @@
     ]
   },
   "author": "Hai Pham",
-  "license": "ISC",
+  "license": "Apache License 2.0",
   "dependencies": {
     "javascriptutilities": "^1.0.10"
   },
