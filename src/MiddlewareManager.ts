@@ -16,7 +16,18 @@ export function builder<T extends Filterable>(): Builder<T> {
   return new Builder();
 }
 
-export class Self<T extends Filterable> implements BuildableType<Builder<T>> {
+export interface Type<T extends Filterable> {
+
+  /**
+   * Apply middlewares.
+   * @param  {T} obj The filterable object.
+   * @returns Observable An Observable instance.
+   */
+  applyMiddlewares(obj: T): Observable<Try<T>>;
+}
+
+export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Type<T> {
+
   /**
    * Get the global middleware identifier - which, if used to identify a
    * middleware, allows it to bypass all filters.
@@ -49,18 +60,22 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>> {
    * @returns M An Array of middlewares.
    */
   public filterMiddlewares<M>(obj: T, middlewares: Middleware<M>[]): Middleware<M>[] {
-    let globalId = Self.globalMWIdentifier; 
-    let identifiers = middlewares.map(value => value.identifier);
-    let filtered = Filterables.filter(obj, identifiers);
+    if (Filterables.isGlobalFilterable(obj)) {
+      return middlewares;
+    } else {
+      let globalId = Self.globalMWIdentifier; 
+      let identifiers = middlewares.map(value => value.identifier);
+      let filtered = Filterables.filter(obj, identifiers);
 
-    let globalMiddlewares = middlewares
-      .filter(value => value.identifier === globalId);
-    
-    let filteredMiddlewares = middlewares
-      .filter(value => filtered.find(v => value.identifier === v) != undefined)
-      .filter(value => value.identifier !== globalId);
+      let globalMiddlewares = middlewares
+        .filter(value => value.identifier === globalId);
+      
+      let filteredMiddlewares = middlewares
+        .filter(value => filtered.find(v => value.identifier === v) != undefined)
+        .filter(value => value.identifier !== globalId);
 
-    return globalMiddlewares.concat(filteredMiddlewares);
+      return globalMiddlewares.concat(filteredMiddlewares);
+    }
   }
 
   public filterTransforms(obj: T): TransformMiddleware<T>[] {
@@ -81,9 +96,26 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>> {
     return Transformers.applyTransformers(obj, middlewares);    
   }
 
+  /**
+   * Apply side effect middlewares.
+   * @param  {T} obj The filterable object.
+   */
   public applySideEffects(obj: T): void {
     let middlewares = this.filterSideEffects(obj).map(value => value.middleware);
     SideEffects.applySideEffects(obj, middlewares);
+  }
+
+  /**
+   * Apply middlewares.
+   * @param  {T} obj The filterable object.
+   * @returns Observable An Observable instance.
+   */
+  public applyMiddlewares(obj: T): Observable<Try<T>> {
+    return this.applyTransformers(obj)
+      .map(value => value.getOrThrow())
+      .doOnNext(value => this.applySideEffects(value))
+      .map(value => Try.success(value))
+      .catchJustReturn(e => Try.failure(e));
   }
 }
 

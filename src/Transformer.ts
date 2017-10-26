@@ -27,7 +27,7 @@ export namespace Transformers {
           if (transformed instanceof Observable) {
             return transformed
               .map(Try.success)
-              .catchJustReturn(value => Try.failure<T>(value));
+              .catchJustReturn(e => Try.failure<T>(e));
           } else {
             return Observable.of(Try.success(transformed));
           }

@@ -1,3 +1,5 @@
 import { MiddlewareFilterableType } from './Middleware';
 
-export interface RequestType extends MiddlewareFilterableType {}
+export interface RequestType extends MiddlewareFilterableType {
+  requestDescription(): string;
+}

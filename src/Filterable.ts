@@ -1,4 +1,4 @@
-import { Nullable } from 'javascriptutilities';
+import { Nullable, Types } from 'javascriptutilities';
 
 export type Filter<T> = (value: T) => boolean;
 
@@ -21,6 +21,16 @@ export interface FilterableType<T> {
   exclusiveFilters(): Filter<T>[];
 }
 
+/// Global filterables that do not have any filter. Use this for filterable
+/// types that bypass all.
+export interface GlobalFilterableType<T> extends FilterableType<T> {
+
+  /**
+   * This method is used to check whether some object is global filterable.
+   */
+  markGlobalFilterable(): void;
+}
+
 export namespace Filterables {
 
   /**
@@ -39,5 +49,14 @@ export namespace Filterables {
     } else {
       return objects.filter(value => !exclusive.some(filter => filter(value)));
     }
+  }
+
+  /**
+   * Check whether some object is global filterable.
+   * @param  {any} obj An object of any type.
+   * @returns boolean A boolean value.
+   */
+  export function isGlobalFilterable<T>(obj: any): obj is GlobalFilterableType<T> {
+    return Types.isInstance(obj, 'markGlobalFilterable');
   }
 }

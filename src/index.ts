@@ -1,5 +1,13 @@
+import * as ErrorHolder from './ErrorHolder';
 import { Filter, FilterableType, Filterables } from './Filterable';
-import { MiddlewareFilterableType } from './Middleware';
+
+import {
+  Middleware,
+  MiddlewareFilterableType, 
+  SideEffectMiddleware, 
+  TransformMiddleware 
+} from './Middleware';
+
 import * as MiddlewareManager from './MiddlewareManager';
 
 import * as RequestExecutor from './RequestExecutor';
@@ -13,9 +21,11 @@ import { SideEffect, SideEffects } from './SideEffect';
 import { Transformer, Transformers } from './Transformer';
 
 export {
+  ErrorHolder,
   Filter,
   FilterableType,
   Filterables,
+  Middleware,
   MiddlewareFilterableType,
   MiddlewareManager,
   RequestExecutor,
@@ -29,6 +39,8 @@ export {
   ResultProcessors,
   SideEffect,
   SideEffects,
+  SideEffectMiddleware,
   Transformer,
-  Transformers
+  Transformers,
+  TransformMiddleware
 };

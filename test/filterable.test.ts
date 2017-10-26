@@ -1,5 +1,5 @@
 import { Nullable, Numbers } from 'javascriptutilities';
-import { Filter, Filterables } from './../src';
+import { ErrorHolder, Filter, Filterables } from './../src';
 
 describe('Filterable should be correct', () => {
   it('Filterables filter should work correctly for inclusive filters', () => {
@@ -42,5 +42,13 @@ describe('Filterable should be correct', () => {
 
     /// Then
     expect(filtered.every(Numbers.isOdd)).toBeTruthy();
+  });
+
+  it('Checking global filterable should work correctly', () => {
+    /// Setup
+    let errorHolder = ErrorHolder.builder().build();
+
+    /// When & Then
+    expect(Filterables.isGlobalFilterable(errorHolder)).toBeTruthy();
   });
 });

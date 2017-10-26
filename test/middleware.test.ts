@@ -1,5 +1,10 @@
 import { Nullable } from 'javascriptutilities';
-import { Filter, MiddlewareFilterableType, MiddlewareManager } from './../src';
+import { 
+  ErrorHolder, 
+  Filter, 
+  MiddlewareFilterableType, 
+  MiddlewareManager 
+} from './../src';
 
 describe('Middleware manager should be correct', () => {
   it('Global middlewares should bypass filters', () => {
@@ -52,5 +57,25 @@ describe('Middleware manager should be correct', () => {
     let seIds = sideEffects.map(value => value.identifier);
     expect(tfIds).toEqual([globalId, 'TF2']);
     expect(seIds).toEqual([globalId, 'SE1']);
+  });
+
+  it('Global filterables should bypass all filters', done => {
+    /// Setup
+    let external = '';
+
+    let manager = MiddlewareManager.builder<ErrorHolder.Self>()
+      .addTransform(e => e.cloneBuilder().withRequestDescription('TF1').build(), 'TF1')
+      .addSideEffect(e => external += e.requestDescription || "", 'SE1')
+      .build();
+
+    let original = ErrorHolder.builder().build();
+
+    /// When & Then
+    manager.applyMiddlewares(original)
+      .doOnNext(e => expect(e.getOrThrow().requestDescription).toBe('TF1'))
+      .doOnError(fail)
+      .doOnCompleted(() => expect(external).toBe('TF1'))
+      .doOnCompleted(done)
+      .subscribe();
   });
 });

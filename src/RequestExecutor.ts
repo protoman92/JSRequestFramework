@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 import { BuildableType, BuilderType, Try } from 'javascriptutilities';
+import * as ErrorHolder from './ErrorHolder';
 import * as MiddlewareManager from './MiddlewareManager';
 import { RequestType } from './Request';
 import { RequestGenerator } from './RequestGenerator';
@@ -28,7 +29,8 @@ export interface Type<Req extends RequestType> {
 /// This class is used to execute requests. The associated generic specifies
 /// the type of request to be executed.
 export class Self<Req extends RequestType> implements BuildableType<Builder<Req>>, Type<Req> {
-  requestMiddlewareManager?: MiddlewareManager.Self<Req>;
+  errMiddlewareManager?: MiddlewareManager.Type<ErrorHolder.Self>;
+  rqMiddlewareManager?: MiddlewareManager.Type<Req>;
 
   public builder(): Builder<Req> {
     return builder();
@@ -52,7 +54,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
       let request = generator(previous);
 
       if (request instanceof Observable) {
-        return request.catchJustReturn(value => Try.failure(value));
+        return request.catchJustReturn(e => Try.failure(e));
       } else {
         return Observable.of(Try.success(request));
       }
@@ -75,7 +77,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
       let res = perform(request);
       
       if (res instanceof Observable) {
-        return res.catchJustReturn(value => Try.failure(value));
+        return res.catchJustReturn(e => Try.failure(e));
       } else {
         return Observable.of(Try.success(res));
       }
@@ -96,11 +98,13 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   ): Observable<Try<Res>> {
     try {
       let req = request.getOrThrow();
+      this.applyErrorMiddlewares;
 
       return this.applyRequestMiddlewares(req)
         .map(req => req.getOrThrow())
         .flatMap(req => this.performActual(req, perform))
-        .catchJustReturn(value => Try.failure(value));
+        .catch(e => this.applyErrorMiddlewares<Res>(request, e))
+        .catchJustReturn(e => Try.failure(e));
     } catch (e) {
       return Observable.of(Try.failure(e));
     }
@@ -128,16 +132,46 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
    * @returns Observable An Observable instance.
    */
   private applyRequestMiddlewares(request: Req): Observable<Try<Req>> {
-    let manager = this.requestMiddlewareManager;
+    let manager = this.rqMiddlewareManager;
 
     if (manager !== undefined) {
-      let rqManager = manager;
-
-      return rqManager.applyTransformers(request)
-        .doOnNext(value => value.map(rqManager.applySideEffects))
-        .catchJustReturn(value => Try.failure(value));
+      return manager.applyMiddlewares(request);
     } else {
       return Observable.of(Try.success(request));
+    }
+  }
+
+  /**
+   * Apply error middlewares.
+   * @param  {Req} request The request to apply middlewares to.
+   * @returns Observable An Observable instance.
+   */
+  private applyErrorMiddlewares<Res>(request: Try<Req>, error: Error): Observable<Try<Res>> {
+    let manager = this.errMiddlewareManager;
+
+    if (manager !== undefined) {
+      let description = request.map(value => value.requestDescription()).value;
+
+      let newError: ErrorHolder.Self;
+
+      if (error instanceof ErrorHolder.Self) {
+        newError = ErrorHolder.builder()
+          .withBuildable(error)
+          .withRequestDescription(description)
+          .build();
+      } else {
+        newError = ErrorHolder.builder()
+          .withRequestDescription(description)
+          .withOriginalError(error)
+          .build();
+      }
+
+      return manager.applyMiddlewares(newError)
+        .map(e => e.getOrThrow())
+        .map(e => Try.failure<Res>(e))
+        .catchJustReturn(e => Try.failure<Res>(e));
+    } else {
+      return Observable.of(Try.failure<Res>(error));
     }
   }
 }
@@ -150,18 +184,31 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
   }
 
   /**
+   * Set the error middleware manager.
+   * @param  {MiddlewareManager.Type<ErrorHolder.Self>} manager? A MiddlewareManager
+   * instance.
+   * @returns this The current Builder instance.
+   */
+  public withErrorMiddlewareManager(manager?: MiddlewareManager.Type<ErrorHolder.Self>): this {
+    this.executor.errMiddlewareManager = manager;
+    return this;
+  }
+
+  /**
    * Set the request middleware manager.
    * @param  {MiddlewareManager<Req>} manager? A MiddlewareManager instance.
    * @returns this The current Builder instance.
    */
-  public withRequestMiddlewareManager(manager?: MiddlewareManager.Self<Req>): this {
-    this.executor.requestMiddlewareManager = manager;
+  public withRequestMiddlewareManager(manager?: MiddlewareManager.Type<Req>): this {
+    this.executor.rqMiddlewareManager = manager;
     return this;
   }
 
   public withBuildable(buildable?: Self<Req>): this {
     if (buildable != undefined) {
-      return this.withRequestMiddlewareManager(buildable.requestMiddlewareManager);
+      return this
+        .withErrorMiddlewareManager(buildable.errMiddlewareManager)
+        .withRequestMiddlewareManager(buildable.rqMiddlewareManager);
     } else {
       return this;
     }

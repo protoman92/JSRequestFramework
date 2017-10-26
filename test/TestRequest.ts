@@ -8,6 +8,7 @@ export function builder(): Builder {
 export class Self implements BuildableType<Builder>, RequestType {
   inclFilters: Filter<string>[];
   exclFilters: Filter<string>[];
+  rqDescription?: string;
 
   constructor() {
     this.inclFilters = [];
@@ -30,6 +31,10 @@ export class Self implements BuildableType<Builder>, RequestType {
   public exclusiveFilters(): Filter<string>[] {
     return this.exclFilters;
   }
+
+  public requestDescription(): string {
+    return this.rqDescription || "";
+  }
 }
 
 export class Builder implements BuilderType<Self> {
@@ -49,11 +54,17 @@ export class Builder implements BuilderType<Self> {
     return this;
   }
 
+  public withRequestDescription(description?: string): this {
+    this.request.rqDescription = description;
+    return this;
+  }
+
   public withBuildable(buildable?: Self): this {
     if (buildable !== undefined) {
       return this
         .withInclusiveFilters(buildable.inclFilters)
-        .withExclusiveFilters(buildable.exclFilters);
+        .withExclusiveFilters(buildable.exclFilters)
+        .withRequestDescription(buildable.rqDescription);
     } else {
       return this;
     }
