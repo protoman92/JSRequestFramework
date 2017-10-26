@@ -77,7 +77,8 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
       let res = perform(request);
       
       if (res instanceof Observable) {
-        return res.catchJustReturn(e => Try.failure(e));
+        let retries = request.requestRetries();
+        return res.retry(retries).catchJustReturn(e => Try.failure(e));
       } else {
         return Observable.of(Try.success(res));
       }

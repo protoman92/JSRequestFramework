@@ -155,4 +155,32 @@ describe('Request executor should be correct', () => {
       .doOnCompleted(done)
       .subscribe();
   }, timeout);
+
+  it('Perform fails - should trigger retry', done => {
+    /// Setup
+    let retries = 1000;
+    let retried = 0;
+
+    let request = TestRequest.builder()
+      .withRequestRetries(retries)
+      .build();
+
+    let previous = Try.success({});
+    let generator = RequestGenerators.forceGn(() => request);
+
+    let perform: RequestPerformer<TestRequest.Self,void> = () => {
+      return Observable.error<Try<void>>('Error 1').doOnError(() => retried += 1);
+    };
+
+    /// When & Then
+    executor.execute(previous, generator, perform)
+      .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
+      .doOnError(fail)
+
+      // Need to add 1 to retries because the first attempt is not counted
+      // as part of the retry count.
+      .doOnCompleted(() => expect(retried).toBe(retries + 1))
+      .doOnCompleted(done)
+      .subscribe();
+  });
 });

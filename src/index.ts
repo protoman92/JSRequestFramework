@@ -3,6 +3,7 @@ import { Filter, FilterableType, Filterables } from './Filterable';
 
 import {
   Middleware,
+  MiddlewareFilter,
   MiddlewareFilterableType, 
   SideEffectMiddleware, 
   TransformMiddleware 
@@ -12,13 +13,14 @@ import * as MiddlewareManager from './MiddlewareManager';
 
 import * as RequestExecutor from './RequestExecutor';
 import * as RequestProcessor from './RequestProcessor';
+import { RequestHandlerType } from './RequestHandler';
 import { RequestGenerator, RequestGenerators } from './RequestGenerator';
 import { RequestPerformer, RequestPerformers } from './RequestPerformer';
 import { ResultProcessor, ResultProcessors } from './ResultProcessor';
 
-import { RequestType } from './Request';
+import { RequestBuilderType, RequestType } from './Request';
 import { SideEffect, SideEffects } from './SideEffect';
-import { Transformer, Transformers } from './Transformer';
+import { Transformed, Transformer, Transformers } from './Transformer';
 
 export {
   ErrorHolder,
@@ -26,11 +28,14 @@ export {
   FilterableType,
   Filterables,
   Middleware,
+  MiddlewareFilter,
   MiddlewareFilterableType,
   MiddlewareManager,
+  RequestBuilderType,
   RequestExecutor,
   RequestGenerator,
   RequestGenerators,
+  RequestHandlerType,
   RequestPerformer,
   RequestPerformers,
   RequestProcessor,
@@ -40,6 +45,7 @@ export {
   SideEffect,
   SideEffects,
   SideEffectMiddleware,
+  Transformed,
   Transformer,
   Transformers,
   TransformMiddleware
