@@ -17,28 +17,28 @@ export class Self implements BuildableType<Builder>, RequestType {
     this.retryCount = 1;
   }
 
-  public builder(): Builder {
+  public builder = (): Builder => {
     return builder();
   }
 
-  public cloneBuilder(): Builder {
+  public cloneBuilder = (): Builder => {
     return this.builder().withBuildable(this);
   }
 
-  public inclusiveFilters(): Nullable<Filter<string>[]> {
+  public inclusiveFilters = (): Nullable<Filter<string>[]> => {
     let filters = this.inclFilters;
     return filters.length > 0 ? filters : undefined;
   }
 
-  public exclusiveFilters(): Filter<string>[] {
+  public exclusiveFilters = (): Filter<string>[] => {
     return this.exclFilters;
   }
 
-  public requestDescription(): string {
+  public requestDescription = (): string => {
     return this.rqDescription || "";
   }
 
-  public requestRetries(): number {
+  public requestRetries = (): number => {
     return this.retryCount;
   }
 }
@@ -50,27 +50,27 @@ export class Builder implements BuilderType<Self>, RequestBuilderType {
     this.request = new Self();
   }
 
-  public withInclusiveFilters(filters: Filter<string>[]): this {
+  public withInclusiveFilters = (filters: Filter<string>[]): this => {
     this.request.inclFilters = filters;
     return this;
   }
 
-  public withExclusiveFilters(filters: Filter<string>[]): this {
+  public withExclusiveFilters = (filters: Filter<string>[]): this => {
     this.request.exclFilters = filters;
     return this;
   }
 
-  public withRequestDescription(description?: string): this {
+  public withRequestDescription = (description?: string): this => {
     this.request.rqDescription = description;
     return this;
   }
 
-  public withRequestRetries(retries: number): this {
+  public withRequestRetries = (retries: number): this => {
     this.request.retryCount = retries;
     return this;
   }
 
-  public withBuildable(buildable?: Self): this {
+  public withBuildable = (buildable?: Self): this => {
     if (buildable !== undefined) {
       return this
         .withInclusiveFilters(buildable.inclFilters)
@@ -82,7 +82,7 @@ export class Builder implements BuilderType<Self>, RequestBuilderType {
     }
   }
 
-  public build(): Self {
+  public build = (): Self => {
     return this.request;
   }
 }

@@ -33,24 +33,24 @@ export interface Type<Req extends RequestType> {
 export class Self<Req extends RequestType> implements BuildableType<Builder<Req>>, Type<Req> {
   executor?: RequestExecutor.Type<Req>;
 
-  public builder(): Builder<Req> {
+  public builder = (): Builder<Req> => {
     return builder();
   }
 
-  public cloneBuilder(): Builder<Req> {
+  public cloneBuilder = (): Builder<Req> => {
     return this.builder().withBuildable(this);
   }
 
   /**
    * Process the result of a request into a specified type.
-   * @param  {Try<Res1>} result The result of a request.
-   * @param  {ResultProcessor<Res1,Res2>} process A ResultProcessor instance.
+   * @param  {Try<any>} result The result of a request.
+   * @param  {ResultProcessor<any,any>} process A ResultProcessor instance.
    * @returns Observable An Observable instance.
    */
-  private processResult<Res1,Res2>(
-    result: Try<Res1>,
-    process: ResultProcessor<Res1,Res2>
-  ): Observable<Try<Res2>> {
+  private processResult = (
+    result: Try<any>,
+    process: ResultProcessor<any, any>
+  ): Observable<Try<any>> => {
     try {
       let res1 = result.getOrThrow();
       return process(res1).catchJustReturn(e => Try.failure(e));
@@ -61,18 +61,18 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Execute a request and process the result into some other type.
-   * @param  {Try<Prev>} previous The result of the previous operation.
-   * @param  {RequestGenerator<Prev,Req>} generator A RequestGenerator instance.
-   * @param  {RequestPerformer<Req,Res1>} perform A RequestPerformer instance.
-   * @param  {ResultProcessor<Res1,Res2>} process A ResultProcessor instance.
+   * @param  {Try<any>} previous The result of the previous operation.
+   * @param  {RequestGenerator<any,Req>} generator A RequestGenerator instance.
+   * @param  {RequestPerformer<Req,any>} perform A RequestPerformer instance.
+   * @param  {ResultProcessor<any,any>} process A ResultProcessor instance.
    * @returns Observable An Observable instance.
    */
-  public process<Prev,Res1,Res2>(
-    previous: Try<Prev>,
-    generator: RequestGenerator<Prev,Req>,
-    perform: RequestPerformer<Req,Res1>,
-    process: ResultProcessor<Res1,Res2>
-  ): Observable<Try<Res2>> {
+  public process = (
+    previous: Try<any>,
+    generator: RequestGenerator<any,Req>,
+    perform: RequestPerformer<Req,any>,
+    process: ResultProcessor<any,any>
+  ): Observable<Try<any>> => {
     let executor = this.executor;
 
     if (executor !== undefined) {
@@ -101,12 +101,12 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
    * @param  {RequestExecutor.Type<Req>} executor? A RequestExecutor instance.
    * @returns this The current Builder instance.
    */
-  public withExecutor(executor?: RequestExecutor.Type<Req>): this {
+  public withExecutor = (executor?: RequestExecutor.Type<Req>): this => {
     this.processor.executor = executor;
     return this;
   }
 
-  public withBuildable(buildable?: Self<Req>): this {
+  public withBuildable = (buildable?: Self<Req>): this => {
     if (buildable !== undefined) {
       return this.withExecutor(buildable.executor);
     } else {
@@ -114,7 +114,7 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
     }
   }
 
-  public build(): Self<Req> {
+  public build = (): Self<Req> => {
     return this.processor;
   }
 }

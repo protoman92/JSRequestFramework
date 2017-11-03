@@ -36,31 +36,31 @@ export class Self implements
     return error !== undefined ? error.stack : undefined;
   }
 
-  public builder(): Builder {
+  public builder = (): Builder => {
     return builder();
   }
 
-  public cloneBuilder(): Builder {
+  public cloneBuilder = (): Builder => {
     return this.builder().withBuildable(this);
   }
 
-  public inclusiveFilters(): Nullable<Filter<string>[]> {
+  public inclusiveFilters = (): Nullable<Filter<string>[]> => {
     return undefined;
   }
 
-  public exclusiveFilters(): Filter<string>[] {
+  public exclusiveFilters = (): Filter<string>[] => {
     return [];
   }
 
-  public markGlobalFilterable() {}
+  public markGlobalFilterable = () => {}
 
-  public toString(): string {
+  public toString = (): string => {
     return `${this.requestDescription}: ${this.originalError}`;
   }
 }
 
 export class Builder implements BuilderType<Self> {
-  error: Self;
+  private error: Self;
 
   constructor() {
     this.error = new Self();
@@ -71,7 +71,7 @@ export class Builder implements BuilderType<Self> {
    * @param  {string} description? A string value.
    * @returns this The current Builder instance.
    */
-  public withRequestDescription(description?: string): this {
+  public withRequestDescription = (description?: string): this => {
     this.error.requestDescription = description;
     return this;
   }
@@ -81,12 +81,12 @@ export class Builder implements BuilderType<Self> {
    * @param  {Error} error? An Error instance.
    * @returns this The current Builder instance.
    */
-  public withOriginalError(error?: Error): this {
+  public withOriginalError = (error?: Error): this => {
     this.error.originalError = error;
     return this;
   }
 
-  public withBuildable(buildable: Self): this {
+  public withBuildable = (buildable: Self): this => {
     if (buildable !== undefined) {
       return this
         .withRequestDescription(buildable.requestDescription)
@@ -96,7 +96,7 @@ export class Builder implements BuilderType<Self> {
     }
   }
 
-  public build(): Self {
+  public build = (): Self => {
     return this.error;
   }
 }

@@ -45,21 +45,21 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
     this.transforms = [];
   }
 
-  public builder(): Builder<T> {
+  public builder = (): Builder<T> => {
     return builder();
   }
 
-  public cloneBuilder(): Builder<T> {
+  public cloneBuilder = (): Builder<T> => {
     return this.builder().withBuildable(this);
   }
 
   /**
    * Filter out unnecessary middlewares.
    * @param  {T} obj The filterable object.
-   * @param  {Middleware<M>[]} middlewares An Array of middleware wrappers.
+   * @param  {Middleware<any>[]} middlewares An Array of middleware wrappers.
    * @returns M An Array of middlewares.
    */
-  public filterMiddlewares<M>(obj: T, middlewares: Middleware<M>[]): Middleware<M>[] {
+  public filterMiddlewares = (obj: T, middlewares: Middleware<any>[]): Middleware<any>[] => {
     if (Filterables.isGlobalFilterable(obj)) {
       return middlewares;
     } else {
@@ -78,11 +78,11 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
     }
   }
 
-  public filterTransforms(obj: T): TransformMiddleware<T>[] {
+  public filterTransforms = (obj: T): TransformMiddleware<T>[] => {
     return this.filterMiddlewares(obj, this.transforms);
   }
 
-  public filterSideEffects(obj: T): SideEffectMiddleware<T>[] {
+  public filterSideEffects = (obj: T): SideEffectMiddleware<T>[] => {
     return this.filterMiddlewares(obj, this.sideEffects);
   }
 
@@ -91,7 +91,7 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
    * @param  {T} obj The filterable object.
    * @returns Observable An Observable instance.
    */
-  public applyTransformers(obj: T): Observable<Try<T>> {
+  public applyTransformers = (obj: T): Observable<Try<T>> => {
     let middlewares = this.filterTransforms(obj).map(value => value.middleware);
     return Transformers.applyTransformers(obj, middlewares);    
   }
@@ -100,7 +100,7 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
    * Apply side effect middlewares.
    * @param  {T} obj The filterable object.
    */
-  public applySideEffects(obj: T): void {
+  public applySideEffects = (obj: T): void => {
     let middlewares = this.filterSideEffects(obj).map(value => value.middleware);
     SideEffects.applySideEffects(obj, middlewares);
   }
@@ -110,7 +110,7 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
    * @param  {T} obj The filterable object.
    * @returns Observable An Observable instance.
    */
-  public applyMiddlewares(obj: T): Observable<Try<T>> {
+  public applyMiddlewares = (obj: T): Observable<Try<T>> => {
     return this.applyTransformers(obj)
       .map(value => value.getOrThrow())
       .doOnNext(value => this.applySideEffects(value))
@@ -126,43 +126,43 @@ export class Builder<T extends Filterable> implements BuilderType<Self<T>> {
     this.manager = new Self();
   }
 
-  public withTransforms(transforms: TransformMiddleware<T>[]): this {
+  public withTransforms = (transforms: TransformMiddleware<T>[]): this => {
     this.manager.transforms = transforms;
     return this;
   }
 
-  public addTransforms(transforms: TransformMiddleware<T>[]): this {
+  public addTransforms = (transforms: TransformMiddleware<T>[]): this => {
     return this.withTransforms(this.manager.transforms.concat(transforms));
   }
 
-  public addTransform(transform: Transformer<T>, identifier: string): this {
+  public addTransform = (transform: Transformer<T>, identifier: string): this => {
     this.manager.transforms.push(new Middleware(identifier, transform));
     return this;
   }
 
-  public addGlobalTransform(transform: Transformer<T>): this {
+  public addGlobalTransform = (transform: Transformer<T>): this => {
     return this.addTransform(transform, Self.globalMWIdentifier);
   }
 
-  public withSideEffects(sideEffects: SideEffectMiddleware<T>[]): this {
+  public withSideEffects = (sideEffects: SideEffectMiddleware<T>[]): this => {
     this.manager.sideEffects = sideEffects;
     return this;
   }
 
-  public addSideEffects(sideEffects: SideEffectMiddleware<T>[]): this {
+  public addSideEffects = (sideEffects: SideEffectMiddleware<T>[]): this => {
     return this.withSideEffects(this.manager.sideEffects.concat(sideEffects));
   }
 
-  public addSideEffect(sideEffect: SideEffect<T>, identifier: string): this {
+  public addSideEffect = (sideEffect: SideEffect<T>, identifier: string): this => {
     this.manager.sideEffects.push(new Middleware(identifier, sideEffect));
     return this;
   }
 
-  public addGlobalSideEffect(sideEffect: SideEffect<T>): this {
+  public addGlobalSideEffect = (sideEffect: SideEffect<T>): this => {
     return this.addSideEffect(sideEffect, Self.globalMWIdentifier);
   }
 
-  public withBuildable(buildable?: Self<T>): this {
+  public withBuildable = (buildable?: Self<T>): this => {
     if (buildable != undefined) {
       return this
         .withTransforms(buildable.transforms)
@@ -172,7 +172,7 @@ export class Builder<T extends Filterable> implements BuilderType<Self<T>> {
     }
   }
 
-  public build(): Self<T> {
+  public build = (): Self<T> => {
     return this.manager;
   }
 }
