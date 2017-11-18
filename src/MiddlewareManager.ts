@@ -135,9 +135,13 @@ export class Builder<T extends Filterable> implements BuilderType<Self<T>> {
     return this.withTransforms(this.manager.transforms.concat(transforms));
   }
 
-  public addTransform = (transform: Transformer<T>, identifier: string): this => {
-    this.manager.transforms.push(new Middleware(identifier, transform));
+  public addTransformMW = (transform: TransformMiddleware<T>): this => {
+    this.manager.transforms.push(transform);
     return this;
+  }
+
+  public addTransform = (transform: Transformer<T>, identifier: string): this => {
+    return this.addTransformMW(new Middleware(identifier, transform));
   }
 
   public addGlobalTransform = (transform: Transformer<T>): this => {
@@ -153,9 +157,13 @@ export class Builder<T extends Filterable> implements BuilderType<Self<T>> {
     return this.withSideEffects(this.manager.sideEffects.concat(sideEffects));
   }
 
-  public addSideEffect = (sideEffect: SideEffect<T>, identifier: string): this => {
-    this.manager.sideEffects.push(new Middleware(identifier, sideEffect));
+  public addSideEffectMW = (sideEffect: SideEffectMiddleware<T>): this => {
+    this.manager.sideEffects.push(sideEffect);
     return this;
+  }
+
+  public addSideEffect = (sideEffect: SideEffect<T>, identifier: string): this => {
+    return this.addSideEffectMW(new Middleware(identifier, sideEffect));
   }
 
   public addGlobalSideEffect = (sideEffect: SideEffect<T>): this => {
