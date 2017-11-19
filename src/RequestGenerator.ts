@@ -1,7 +1,6 @@
-import { Observable } from 'rxjs';
-import { Try } from 'javascriptutilities';
+import { ReactiveResult, Try } from 'javascriptutilities';
 
-export type RequestGenerator<Prev,Req> = (p: Try<Prev>) => Req | Try<Req> | Observable<Try<Req>>; 
+export type RequestGenerator<Prev,Req> = (p: Try<Prev>) => ReactiveResult<Req>;
 
 export namespace RequestGenerators {
 
@@ -12,14 +11,14 @@ export namespace RequestGenerators {
    * @returns RequestGenerator A RequestGenerator instance.
    */
   export function forceGn<Prev,Req>(
-    generator: (previous: Prev) =>  Req | Try<Req> | Observable<Try<Req>>
+    generator: (previous: Prev) => ReactiveResult<Req>
   ): RequestGenerator<Prev,Req> {
     return previous => {
       try {
         let prev = previous.getOrThrow();
         return generator(prev);
       } catch (e) {
-        return Observable.of(Try.failure(e));
+        return Try.failure(e);
       }
     };
   }

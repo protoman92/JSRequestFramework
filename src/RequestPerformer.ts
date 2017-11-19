@@ -1,7 +1,6 @@
-import { Observable } from 'rxjs';
-import { Try } from 'javascriptutilities';
+import { ReactiveResult } from 'javascriptutilities';
 
-export type RequestPerformer<Req,Res> = (r: Req) => Res | Try<Res> | Observable<Try<Res>>;
+export type RequestPerformer<Req,Res> = (r: Req) => ReactiveResult<Res>;
 
 export namespace RequestPerformers {
 

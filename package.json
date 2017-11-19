@@ -23,7 +23,7 @@
   "author": "Hai Pham",
   "license": "Apache-2.0",
   "dependencies": {
-    "javascriptutilities": "^1.0.10"
+    "javascriptutilities": "^1.0.13"
   },
   "devDependencies": {
     "@types/jest": "^21.1.4",
