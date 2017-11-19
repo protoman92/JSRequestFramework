@@ -54,7 +54,9 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
       let request = generator(previous);
 
       if (request instanceof Observable) {
-        return request.catchJustReturn(e => Try.failure(e));
+        return request
+          .map(value => Try.success(value))
+          .catchJustReturn(e => Try.failure(e));
       } else {
         return Observable.of(Try.success(request));
       }
@@ -78,7 +80,11 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
       
       if (res instanceof Observable) {
         let retries = request.requestRetries();
-        return res.retry(retries).catchJustReturn(e => Try.failure(e));
+        
+        return res
+          .map(value => Try.success(value))
+          .retry(retries)
+          .catchJustReturn(e => Try.failure(e));
       } else {
         return Observable.of(Try.success(res));
       }
@@ -99,7 +105,6 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   ): Observable<Try<any>> => {
     try {
       let req = request.getOrThrow();
-      this.applyErrorMiddlewares;
 
       return this.applyRequestMiddlewares(req)
         .map(req => req.getOrThrow())

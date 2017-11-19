@@ -158,7 +158,7 @@ describe('Request executor should be correct', () => {
 
   it('Perform fails - should trigger retry', done => {
     /// Setup
-    let retries = 1000;
+    let retries = 10;
     let retried = 0;
 
     let request = TestRequest.builder()

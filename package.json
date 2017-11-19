@@ -1,6 +1,6 @@
 {
   "name": "jsrequestframework",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "JS-based request framework",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -21,9 +21,9 @@
     ]
   },
   "author": "Hai Pham",
-  "license": "Apache License 2.0",
+  "license": "Apache-2.0",
   "dependencies": {
-    "javascriptutilities": "^1.0.10"
+    "javascriptutilities": "^1.0.13"
   },
   "devDependencies": {
     "@types/jest": "^21.1.4",

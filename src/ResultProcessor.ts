@@ -1,7 +1,6 @@
-import { Observable } from 'rxjs';
-import { Try } from 'javascriptutilities';
+import { ReactiveResult, Try } from 'javascriptutilities';
 
-export type ResultProcessor<Res1,Res2> = (r: Res1) => Observable<Try<Res2>>;
+export type ResultProcessor<Res1, Res2> = (r: Res1) => ReactiveResult<Res2>;
 
 export namespace ResultProcessors {
 
@@ -10,6 +9,6 @@ export namespace ResultProcessors {
    * @returns ResultProcessor A ResultProcessor instance.
    */
   export function eq<T>(): ResultProcessor<T,T> {
-    return value => Observable.of(Try.success(value));
+    return value => Try.success(value);
   }
 }
