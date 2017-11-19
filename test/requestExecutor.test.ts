@@ -173,7 +173,7 @@ describe('Request executor should be correct', () => {
     };
 
     /// When & Then
-    executor.execute(previous, generator, perform)
+    executor.execute(previous, generator, perform) 
       .doOnNext(value => expect(value.error).toEqual(new Error('Error 1')))
       .doOnError(fail)
 

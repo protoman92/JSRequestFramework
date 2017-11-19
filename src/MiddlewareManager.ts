@@ -56,7 +56,7 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
   /**
    * Filter out unnecessary middlewares.
    * @param  {T} obj The filterable object.
-   * @param  {Middleware<any>[]} middlewares An Array of middleware wrappers.
+   * @param  {Middleware<T>[]} middlewares An Array of middleware wrappers.
    * @returns M An Array of middlewares.
    */
   public filterMiddlewares = (obj: T, middlewares: Middleware<any>[]): Middleware<any>[] => {

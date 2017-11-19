@@ -43,42 +43,42 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Process the result of a request into a specified type.
-   * @param  {Try<any>} result The result of a request.
-   * @param  {ResultProcessor<any,any>} process A ResultProcessor instance.
+   * @param  {Try<Res1>} result The result of a request.
+   * @param  {ResultProcessor<Res1,Res2>} process A ResultProcessor instance.
    * @returns Observable An Observable instance.
    */
-  private processResult = (
-    result: Try<any>,
-    process: ResultProcessor<any, any>
-  ): Observable<Try<any>> => {
+  private processResult<Res1,Res2>(
+    result: Try<Res1>,
+    process: ResultProcessor<Res1,Res2>
+  ): Observable<Try<Res2>> {
     try {
       let res1 = result.getOrThrow();
-      return process(res1).catchJustReturn(e => Try.failure(e));
+      return process(res1).catchJustReturn(e => Try.failure<Res2>(e));
     } catch (e) {
-      return Observable.of(Try.failure(e));
+      return Observable.of(Try.failure<Res2>(e));
     }
   }
 
   /**
    * Execute a request and process the result into some other type.
-   * @param  {Try<any>} previous The result of the previous operation.
-   * @param  {RequestGenerator<any,Req>} generator A RequestGenerator instance.
-   * @param  {RequestPerformer<Req,any>} perform A RequestPerformer instance.
-   * @param  {ResultProcessor<any,any>} process A ResultProcessor instance.
+   * @param  {Try<Prev>} previous The result of the previous operation.
+   * @param  {RequestGenerator<Prev,Req>} generator A RequestGenerator instance.
+   * @param  {RequestPerformer<Req,Res1>} perform A RequestPerformer instance.
+   * @param  {ResultProcessor<Res1,Res2>} process A ResultProcessor instance.
    * @returns Observable An Observable instance.
    */
-  public process = (
-    previous: Try<any>,
-    generator: RequestGenerator<any,Req>,
-    perform: RequestPerformer<Req,any>,
-    process: ResultProcessor<any,any>
-  ): Observable<Try<any>> => {
+  public process<Prev,Res1,Res2>(
+    previous: Try<Prev>,
+    generator: RequestGenerator<Prev,Req>,
+    perform: RequestPerformer<Req,Res1>,
+    process: ResultProcessor<Res1,Res2>
+  ): Observable<Try<Res2>> {
     let executor = this.executor;
 
     if (executor !== undefined) {
       try {
         return executor.execute(previous, generator, perform)
-          .catchJustReturn(e => Try.failure(e))
+          .catchJustReturn(e => Try.failure<Res1>(e))
           .flatMap(value => this.processResult(value, process));
       } catch (e) {
         return Observable.of(Try.failure(e));

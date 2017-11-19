@@ -42,14 +42,14 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Generate a request object based on the previous result.
-   * @param  {Try<any>} previous Previous result.
+   * @param  {Try<Prev>} previous Previous result.
    * @param  {RequestGenerator<Prev,Req>} generator Request generator.
    * @returns Observable An Observable instance.
    */
-  public request = (
-    previous: Try<any>, 
-    generator: RequestGenerator<any,Req>
-  ): Observable<Try<Req>> => {
+  public request<Prev>(
+    previous: Try<Prev>, 
+    generator: RequestGenerator<Prev,Req>
+  ): Observable<Try<Req>> {
     try {
       let request = generator(previous);
 
@@ -66,13 +66,13 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   /**
    * Actually perform a request.
    * @param  {Req} request The request to be performed.
-   * @param  {RequestPerformer<Req,any>} perform A RequestPerformer instance.
+   * @param  {RequestPerformer<Req,Res>} perform A RequestPerformer instance.
    * @returns Observable An Observable instance.
    */
-  private performActual = (
+  private performActual<Res>(
     request: Req, 
-    perform: RequestPerformer<Req,any>
-  ): Observable<Try<any>> => {
+    perform: RequestPerformer<Req,Res>
+  ): Observable<Try<Res>> {
     try {
       let res = perform(request);
       
@@ -90,13 +90,13 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   /**
    * Apply middlewares and perform a request.
    * @param  {Try<Req>} request The request to be performed.
-   * @param  {RequestPerformer<Req,any>} perform A RequestPerformer instance.
+   * @param  {RequestPerformer<Req,Res>} perform A RequestPerformer instance.
    * @returns Observable An Observable instance.
    */
-  public perform = (
+  public perform<Res>(
     request: Try<Req>, 
-    perform: RequestPerformer<Req,any>
-  ): Observable<Try<any>> => {
+    perform: RequestPerformer<Req,Res>
+  ): Observable<Try<Res>> {
     try {
       let req = request.getOrThrow();
       this.applyErrorMiddlewares;
@@ -105,7 +105,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
         .map(req => req.getOrThrow())
         .flatMap(req => this.performActual(req, perform))
         .catch(e => this.applyErrorMiddlewares(request, e))
-        .catchJustReturn(e => Try.failure(e));
+        .catchJustReturn(e => Try.failure<Res>(e));
     } catch (e) {
       return Observable.of(Try.failure(e));
     }
@@ -113,16 +113,16 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Generate a request based on some previous result and execute it.
-   * @param  {Try<any>} previous
-   * @param  {RequestGenerator<any,Req>} generator
-   * @param  {RequestPerformer<Req,any>} perform
+   * @param  {Try<Prev>} previous
+   * @param  {RequestGenerator<Prev,Req>} generator
+   * @param  {RequestPerformer<Req,Res>} perform
    * @returns Observable An Observable instance.
    */
-  public execute = (
-    previous: Try<any>,
-    generator: RequestGenerator<any,Req>,
-    perform: RequestPerformer<Req,any>
-  ): Observable<Try<any>> => {
+  public execute<Prev,Res>(
+    previous: Try<Prev>,
+    generator: RequestGenerator<Prev,Req>,
+    perform: RequestPerformer<Req,Res>
+  ): Observable<Try<Res>> {
     return this.request(previous, generator)
       .flatMap(request => this.perform(request, perform));
   }
@@ -147,7 +147,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
    * @param  {Req} request The request to apply middlewares to.
    * @returns Observable An Observable instance.
    */
-  private applyErrorMiddlewares = (request: Try<Req>, error: Error): Observable<Try<any>> => {
+  private applyErrorMiddlewares<Res>(request: Try<Req>, error: Error): Observable<Try<Res>> {
     let manager = this.errMiddlewareManager;
 
     if (manager !== undefined) {
@@ -169,10 +169,10 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
       return manager.applyMiddlewares(newError)
         .map(e => e.getOrThrow())
-        .map(e => Try.failure<any>(e))
-        .catchJustReturn(e => Try.failure<any>(e));
+        .map(e => Try.failure<Res>(e))
+        .catchJustReturn(e => Try.failure<Res>(e));
     } else {
-      return Observable.of(Try.failure<any>(error));
+      return Observable.of(Try.failure<Res>(error));
     }
   }
 }

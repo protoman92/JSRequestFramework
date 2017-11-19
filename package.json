@@ -1,6 +1,6 @@
 {
   "name": "jsrequestframework",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "JS-based request framework",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
