@@ -43,7 +43,7 @@ export namespace Filterables {
     let inclusive = filterable.inclusiveFilters();
     let exclusive = filterable.exclusiveFilters();
     
-    if (inclusive !== undefined) {
+    if (inclusive !== undefined && inclusive !== null) {
       let filters = inclusive;
       return objects.filter(value => filters.every(filter => filter(value)));
     } else {

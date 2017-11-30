@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { BuildableType, BuilderType, Try } from 'javascriptutilities';
+import { BuildableType, BuilderType, Nullable, Try } from 'javascriptutilities';
 import { RequestGenerator } from './RequestGenerator';
 import { RequestPerformer } from './RequestPerformer';
 import { ResultProcessor } from './ResultProcessor';
@@ -31,7 +31,7 @@ export interface Type<Req extends RequestType> {
 /// This class is used to process the result of some requests. This is done in
 /// order to hide internal implementations of the requests being executed.
 export class Self<Req extends RequestType> implements BuildableType<Builder<Req>>, Type<Req> {
-  executor?: RequestExecutor.Type<Req>;
+  executor: Nullable<RequestExecutor.Type<Req>>;
 
   public builder = (): Builder<Req> => {
     return builder();
@@ -81,7 +81,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   ): Observable<Try<Res2>> {
     let executor = this.executor;
 
-    if (executor !== undefined) {
+    if (executor !== undefined && executor !== null) {
       try {
         return executor.execute(previous, generator, perform)
           .catchJustReturn(e => Try.failure<Res1>(e))
@@ -107,13 +107,13 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
    * @param  {RequestExecutor.Type<Req>} executor? A RequestExecutor instance.
    * @returns this The current Builder instance.
    */
-  public withExecutor = (executor?: RequestExecutor.Type<Req>): this => {
+  public withExecutor = (executor: Nullable<RequestExecutor.Type<Req>>): this => {
     this.processor.executor = executor;
     return this;
   }
 
-  public withBuildable = (buildable?: Self<Req>): this => {
-    if (buildable !== undefined) {
+  public withBuildable = (buildable: Nullable<Self<Req>>): this => {
+    if (buildable !== undefined && buildable !== null) {
       return this.withExecutor(buildable.executor);
     } else {
       return this;

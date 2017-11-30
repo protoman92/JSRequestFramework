@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { BuildableType, BuilderType, Try } from 'javascriptutilities';
+import { BuildableType, BuilderType, Nullable, Try } from 'javascriptutilities';
 import * as ErrorHolder from './ErrorHolder';
 import * as MiddlewareManager from './MiddlewareManager';
 import { RequestType } from './Request';
@@ -29,8 +29,8 @@ export interface Type<Req extends RequestType> {
 /// This class is used to execute requests. The associated generic specifies
 /// the type of request to be executed.
 export class Self<Req extends RequestType> implements BuildableType<Builder<Req>>, Type<Req> {
-  errMiddlewareManager?: MiddlewareManager.Type<ErrorHolder.Self>;
-  rqMiddlewareManager?: MiddlewareManager.Type<Req>;
+  errMiddlewareManager: Nullable<MiddlewareManager.Type<ErrorHolder.Self>>;
+  rqMiddlewareManager: Nullable<MiddlewareManager.Type<Req>>;
 
   public builder = (): Builder<Req> => {
     return builder();
@@ -140,7 +140,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   private applyRequestMiddlewares = (request: Req): Observable<Try<Req>> => {
     let manager = this.rqMiddlewareManager;
 
-    if (manager !== undefined) {
+    if (manager !== undefined && manager !== null) {
       return manager.applyMiddlewares(request);
     } else {
       return Observable.of(Try.success(request));
@@ -155,7 +155,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
   private applyErrorMiddlewares<Res>(request: Try<Req>, error: Error): Observable<Try<Res>> {
     let manager = this.errMiddlewareManager;
 
-    if (manager !== undefined) {
+    if (manager !== undefined && manager !== null) {
       let description = request.map(value => value.requestDescription()).value;
 
       let newError: ErrorHolder.Self;
@@ -196,7 +196,7 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
    * @returns this The current Builder instance.
    */
   public withErrorMiddlewareManager(
-    manager?: MiddlewareManager.Type<ErrorHolder.Self>
+    manager: Nullable<MiddlewareManager.Type<ErrorHolder.Self>>
   ): this {
     this.executor.errMiddlewareManager = manager;
     return this;
@@ -207,12 +207,14 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
    * @param  {MiddlewareManager<Req>} manager? A MiddlewareManager instance.
    * @returns this The current Builder instance.
    */
-  public withRequestMiddlewareManager = (manager?: MiddlewareManager.Type<Req>): this => {
+  public withRequestMiddlewareManager = (
+    manager: Nullable<MiddlewareManager.Type<Req>>
+  ): this => {
     this.executor.rqMiddlewareManager = manager;
     return this;
   }
 
-  public withBuildable = (buildable?: Self<Req>): this => {
+  public withBuildable = (buildable: Nullable<Self<Req>>): this => {
     if (buildable != undefined) {
       return this
         .withErrorMiddlewareManager(buildable.errMiddlewareManager)

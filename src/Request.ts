@@ -1,3 +1,4 @@
+import { Nullable } from 'javascriptutilities';
 import { MiddlewareFilter, MiddlewareFilterableType } from './Middleware';
 
 export interface RequestType extends MiddlewareFilterableType {
@@ -36,7 +37,7 @@ export interface RequestBuilderType {
    * @param  {string} description? A string value.
    * @returns this The current Builder instance.
    */
-  withRequestDescription(description?: string): this;
+  withRequestDescription(description: Nullable<string>): this;
 
   /**
    * Set the request retry count.

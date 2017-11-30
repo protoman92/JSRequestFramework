@@ -6,9 +6,9 @@ export function builder(): Builder {
 }
 
 export class Type {
-  requestDescription?: string;
+  requestDescription: Nullable<string>;
 
-  originalError?: Error;
+  originalError: Nullable<Error>;
 }
 
 /// Use this class to intercept request errors.
@@ -18,22 +18,22 @@ export class Self implements
   GlobalFilterableType<string>, 
   Type
 {
-  requestDescription?: string;
-  originalError?: Error;
+  requestDescription: Nullable<string>;
+  originalError: Nullable<Error>;
 
   public get name(): string {
     let error = this.originalError;
-    return error !== undefined ? error.name : "";
+    return error !== undefined && error !== null ? error.name : "";
   }
 
   public get message(): string {
     let error = this.originalError;
-    return error !== undefined ? error.message : "";
+    return error !== undefined && error !== null ? error.message : "";
   }
 
-  public get stack(): Nullable<string> {
+  public get stack(): string | undefined {
     let error = this.originalError;
-    return error !== undefined ? error.stack : undefined;
+    return error !== undefined && error != null ? error.stack : undefined;
   }
 
   public builder = (): Builder => {
@@ -52,7 +52,7 @@ export class Self implements
     return [];
   }
 
-  public markGlobalFilterable = () => {}
+  public markGlobalFilterable = () => {};
 
   public toString = (): string => {
     return `${this.requestDescription}: ${this.originalError}`;
@@ -71,7 +71,7 @@ export class Builder implements BuilderType<Self> {
    * @param  {string} description? A string value.
    * @returns this The current Builder instance.
    */
-  public withRequestDescription = (description?: string): this => {
+  public withRequestDescription = (description: Nullable<string>): this => {
     this.error.requestDescription = description;
     return this;
   }
@@ -81,7 +81,7 @@ export class Builder implements BuilderType<Self> {
    * @param  {Error} error? An Error instance.
    * @returns this The current Builder instance.
    */
-  public withOriginalError = (error?: Error): this => {
+  public withOriginalError = (error: Nullable<Error>): this => {
     this.error.originalError = error;
     return this;
   }

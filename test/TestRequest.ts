@@ -8,7 +8,7 @@ export function builder(): Builder {
 export class Self implements BuildableType<Builder>, RequestType {
   inclFilters: Filter<string>[];
   exclFilters: Filter<string>[];
-  rqDescription?: string;
+  rqDescription: Nullable<string>;
   retryCount: number;
 
   constructor() {
@@ -60,7 +60,7 @@ export class Builder implements BuilderType<Self>, RequestBuilderType {
     return this;
   }
 
-  public withRequestDescription = (description?: string): this => {
+  public withRequestDescription = (description: Nullable<string>): this => {
     this.request.rqDescription = description;
     return this;
   }
@@ -70,8 +70,8 @@ export class Builder implements BuilderType<Self>, RequestBuilderType {
     return this;
   }
 
-  public withBuildable = (buildable?: Self): this => {
-    if (buildable !== undefined) {
+  public withBuildable = (buildable: Nullable<Self>): this => {
+    if (buildable !== undefined && buildable !== null) {
       return this
         .withInclusiveFilters(buildable.inclFilters)
         .withExclusiveFilters(buildable.exclFilters)

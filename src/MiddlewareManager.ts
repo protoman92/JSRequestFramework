@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { BuildableType, BuilderType, Try } from 'javascriptutilities';
+import { BuildableType, BuilderType, Nullable, Try } from 'javascriptutilities';
 import { Filterables } from './Filterable';
 
 import {
@@ -170,7 +170,7 @@ export class Builder<T extends Filterable> implements BuilderType<Self<T>> {
     return this.addSideEffect(sideEffect, Self.globalMWIdentifier);
   }
 
-  public withBuildable = (buildable?: Self<T>): this => {
+  public withBuildable = (buildable: Nullable<Self<T>>): this => {
     if (buildable != undefined) {
       return this
         .withTransforms(buildable.transforms)
