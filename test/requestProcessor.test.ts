@@ -82,9 +82,9 @@ describe('Request processor\'s processing should be correct', () => {
           let result = perform(request);
           
           if (result instanceof Observable) {
-            return result.map(value => Try.success(value));
+            return result.map(value => Try.unwrap(value));
           } else {
-            return Observable.of(Try.success(result));
+            return Observable.of(Try.unwrap(result));
           }
         }
       })

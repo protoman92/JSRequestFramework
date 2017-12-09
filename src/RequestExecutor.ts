@@ -47,8 +47,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
    * @returns Observable An Observable instance.
    */
   public request<Prev>(
-    previous: Try<Prev>, 
-    generator: RequestGenerator<Prev,Req>
+    previous: Try<Prev>, generator: RequestGenerator<Prev,Req>
   ): Observable<Try<Req>> {
     try {
       let request = generator(previous);
@@ -58,7 +57,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
           .map(value => Try.success(value))
           .catchJustReturn(e => Try.failure(e));
       } else {
-        return Observable.of(Try.success(request));
+        return Observable.of(Try.unwrap(request, 'Request not available'));
       }
     } catch (e) {
       return Observable.of(Try.failure(e));
@@ -86,7 +85,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
           .retry(retries)
           .catchJustReturn(e => Try.failure(e));
       } else {
-        return Observable.of(Try.success(res));
+        return Observable.of(Try.unwrap(res, 'Result not available'));
       }
     } catch (e) {
       return Observable.of(Try.failure(e));

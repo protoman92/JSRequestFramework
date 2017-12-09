@@ -58,7 +58,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
       if (value instanceof Observable) {
         return value.catchJustReturn(e => Try.failure<Res2>(e));
       } else {
-        return Observable.of(Try.success(value));
+        return Observable.of(Try.unwrap(value, 'Value not available'));
       }
     } catch (e) {
       return Observable.of(Try.failure<Res2>(e));

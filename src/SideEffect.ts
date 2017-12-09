@@ -11,10 +11,9 @@ export namespace SideEffects {
    * @param  {SideEffect<T>[]} sideEffects An Array of side effects.
    */
   export function applySideEffects<T>(
-    original: T | Try<T>,
-    sideEffects: SideEffect<T>[]
+    original: T | Try<T>, sideEffects: SideEffect<T>[]
   ) {
-    let value = Try.success(original).getOrThrow();
+    let value = Try.unwrap(original, 'Object not available').getOrThrow();
     sideEffects.forEach(sideEffect => sideEffect(value));
   }
 }

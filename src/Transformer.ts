@@ -13,10 +13,10 @@ export namespace Transformers {
    * @returns Observable An Observable instance.
    */
   export function applyTransformers<T>(
-    original: T | Try<T>,
-    transformers: Transformer<T>[]
+    original: T | Try<T>, transformers: Transformer<T>[]
   ): Observable<Try<T>> {
-    var chain = Observable.of(Try.success(original));
+    let unwrapped = Try.unwrap(original, 'Object not available'); 
+    var chain = Observable.of(unwrapped);
     
     for (let transformer of transformers) {
       chain = chain.flatMap(value => {
@@ -26,10 +26,11 @@ export namespace Transformers {
 
           if (transformed instanceof Observable) {
             return transformed
-              .map(Try.success)
+              .map(v => Try.unwrap(v, 'Transformed not available'))
               .catchJustReturn(e => Try.failure<T>(e));
           } else {
-            return Observable.of(Try.success(transformed));
+            let result = Try.unwrap(transformed, 'Transformed not available');
+            return Observable.of(result);
           }
         } catch (e) {
           return Observable.of(Try.failure<T>(e));
