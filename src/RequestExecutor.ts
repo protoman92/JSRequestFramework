@@ -54,8 +54,8 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
       if (request instanceof Observable) {
         return request
-          .map(value => Try.success(value))
-          .catchJustReturn(e => Try.failure(e));
+          .map(value => Try.unwrap(value, 'Request not available'))
+          .catchJustReturn(e => Try.failure<Req>(e));
       } else {
         return Observable.of(Try.unwrap(request, 'Request not available'));
       }
@@ -81,7 +81,7 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
         let retries = request.requestRetries();
         
         return res
-          .map(value => Try.success(value))
+          .map(value => Try.unwrap(value, 'Result not available'))
           .retry(retries)
           .catchJustReturn(e => Try.failure(e));
       } else {
