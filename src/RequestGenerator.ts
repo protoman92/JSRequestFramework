@@ -6,9 +6,8 @@ export namespace RequestGenerators {
 
   /**
    * Force generate a request by unwrapping the previous value.
-   * @param  {(previous:Prev)=>Try<Req>|Observable<Try<Req>>} generator A
-   * generator function.
-   * @returns RequestGenerator A RequestGenerator instance.
+   * @param {(previous:Prev) => ReactiveResult<Req>} generator generator function.
+   * @returns {RequestGenerator<Prev,Req>} A RequestGenerator instance.
    */
   export function forceGn<Prev,Req>(
     generator: (previous: Prev) => ReactiveResult<Req>

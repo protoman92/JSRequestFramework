@@ -53,8 +53,8 @@ export namespace Filterables {
 
   /**
    * Check whether some object is global filterable.
-   * @param  {any} obj An object of any type.
-   * @returns boolean A boolean value.
+   * @param {*} obj An object of any type.
+   * @returns {obj is GlobalFilterableType<T>} 
    */
   export function isGlobalFilterable<T>(obj: any): obj is GlobalFilterableType<T> {
     return Types.isInstance(obj, ['markGlobalFilterable']);

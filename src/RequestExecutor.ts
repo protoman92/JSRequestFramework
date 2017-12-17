@@ -14,15 +14,15 @@ export interface Type<Req extends RequestType> {
 
   /**   
    * Generate a request based on some previous result and execute it.
-   * @param  {Try<Prev>} previous
-   * @param  {RequestGenerator<Prev,Req>} generator
-   * @param  {RequestPerformer<Req,Res>} perform
-   * @returns Observable An Observable instance.
+   * @param {Try<Prev>} previous
+   * @param {RequestGenerator<Prev,Req>} generator
+   * @param {RequestPerformer<Req,Res>} perform
+   * @returns {Observable<Try<Res>>} An Observable instance.
    */
   execute<Prev,Res>(
     previous: Try<Prev>, 
     generator: RequestGenerator<Prev,Req>,
-    perform: RequestPerformer<Req,Res>
+    perform: RequestPerformer<Req,Res>,
   ): Observable<Try<Res>>;
 }
 
@@ -42,19 +42,19 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Generate a request object based on the previous result.
-   * @param  {Try<Prev>} previous Previous result.
-   * @param  {RequestGenerator<Prev,Req>} generator Request generator.
-   * @returns Observable An Observable instance.
+   * @param {Try<Prev>} previous Previous result.
+   * @param {RequestGenerator<Prev,Req>} generator Request generator.
+   * @returns {Observable<Try<Req>>} An Observable instance.
    */
   public request<Prev>(
-    previous: Try<Prev>, generator: RequestGenerator<Prev,Req>
+    previous: Try<Prev>, generator: RequestGenerator<Prev,Req>,
   ): Observable<Try<Req>> {
     try {
       let request = generator(previous);
 
       if (request instanceof Observable) {
         return request
-          .map(value => Try.unwrap(value, 'Request not available'))
+          .map(value => Try.success(value))
           .catchJustReturn(e => Try.failure<Req>(e));
       } else {
         return Observable.of(Try.unwrap(request, 'Request not available'));
@@ -66,13 +66,12 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Actually perform a request.
-   * @param  {Req} request The request to be performed.
-   * @param  {RequestPerformer<Req,Res>} perform A RequestPerformer instance.
-   * @returns Observable An Observable instance.
+   * @param {Req} request The request to be performed.
+   * @param {RequestPerformer<Req,Res>} perform A RequestPerformer instance.
+   * @returns {Observable<Try<Res>>} An Observable instance.
    */
   private performActual<Res>(
-    request: Req, 
-    perform: RequestPerformer<Req,Res>
+    request: Req, perform: RequestPerformer<Req,Res>,
   ): Observable<Try<Res>> {
     try {
       let res = perform(request);
@@ -94,13 +93,12 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Apply middlewares and perform a request.
-   * @param  {Try<Req>} request The request to be performed.
-   * @param  {RequestPerformer<Req,Res>} perform A RequestPerformer instance.
-   * @returns Observable An Observable instance.
+   * @param {Try<Req>} request The request to be performed.
+   * @param {RequestPerformer<Req,Res>} perform A RequestPerformer instance.
+   * @returns {Observable<Try<Res>>} An Observable instance.
    */
   public perform<Res>(
-    request: Try<Req>, 
-    perform: RequestPerformer<Req,Res>
+    request: Try<Req>, perform: RequestPerformer<Req,Res>,
   ): Observable<Try<Res>> {
     try {
       let req = request.getOrThrow();
@@ -117,15 +115,15 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Generate a request based on some previous result and execute it.
-   * @param  {Try<Prev>} previous
-   * @param  {RequestGenerator<Prev,Req>} generator
-   * @param  {RequestPerformer<Req,Res>} perform
-   * @returns Observable An Observable instance.
+   * @param {Try<Prev>} previous
+   * @param {RequestGenerator<Prev,Req>} generator
+   * @param {RequestPerformer<Req,Res>} perform
+   * @returns {Observable<Try<Res>>} An Observable instance.
    */
   public execute<Prev,Res>(
     previous: Try<Prev>,
     generator: RequestGenerator<Prev,Req>,
-    perform: RequestPerformer<Req,Res>
+    perform: RequestPerformer<Req,Res>,
   ): Observable<Try<Res>> {
     return this.request(previous, generator)
       .flatMap(request => this.perform(request, perform));
@@ -133,8 +131,8 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Apply request middlewares.
-   * @param  {Req} request The request to apply middlewares to.
-   * @returns Observable An Observable instance.
+   * @param {Req} request The request to apply middlewares to.
+   * @returns {Observable<Try<Req>>} An Observable instance.
    */
   private applyRequestMiddlewares = (request: Req): Observable<Try<Req>> => {
     let manager = this.rqMiddlewareManager;
@@ -148,8 +146,8 @@ export class Self<Req extends RequestType> implements BuildableType<Builder<Req>
 
   /**
    * Apply error middlewares.
-   * @param  {Req} request The request to apply middlewares to.
-   * @returns Observable An Observable instance.
+   * @param {Req} request The request to apply middlewares to.
+   * @returns {Observable<Try<Res>>} An Observable instance.
    */
   private applyErrorMiddlewares<Res>(request: Try<Req>, error: Error): Observable<Try<Res>> {
     let manager = this.errMiddlewareManager;
@@ -190,9 +188,9 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
 
   /**
    * Set the error middleware manager.
-   * @param  {MiddlewareManager.Type<ErrorHolder.Self>} manager? A MiddlewareManager
-   * instance.
-   * @returns this The current Builder instance.
+   * @param {Nullable<MiddlewareManager.Type<ErrorHolder.Self>>} manager A 
+   * MiddlewareManager instance.
+   * @returns {this} The current Builder instance.
    */
   public withErrorMiddlewareManager(
     manager: Nullable<MiddlewareManager.Type<ErrorHolder.Self>>
@@ -203,8 +201,8 @@ export class Builder<Req extends RequestType> implements BuilderType<Self<Req>> 
 
   /**
    * Set the request middleware manager.
-   * @param  {MiddlewareManager<Req>} manager? A MiddlewareManager instance.
-   * @returns this The current Builder instance.
+   * @param {Nullable<MiddlewareManager<Req>>} manager A MiddlewareManager instance.
+   * @returns {this} The current Builder instance.
    */
   public withRequestMiddlewareManager = (
     manager: Nullable<MiddlewareManager.Type<Req>>

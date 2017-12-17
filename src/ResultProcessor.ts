@@ -6,7 +6,7 @@ export namespace ResultProcessors {
 
   /**
    * Return exactly what is passed in.
-   * @returns ResultProcessor A ResultProcessor instance.
+   * @returns {ResultProcessor<T,T>} A ResultProcessor instance.
    */
   export function eq<T>(): ResultProcessor<T,T> {
     return value => Try.success(value);

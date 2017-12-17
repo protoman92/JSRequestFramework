@@ -13,14 +13,14 @@ export interface RequestHandlerType<Req extends Filterable,Res> {
 
   /**
    * Perform a request and process the result into some type.
-   * @param  {Try<Req>} previous The result of the previous operation.
-   * @param  {RequestGenerator<Prev,Req>} generator A RequestGenerator instance.
-   * @param  {ResultProcessor<Res,Res2>} processor A ResultProcessor instance.
-   * @returns Observable An Observable instance.
+   * @param {Try<Req>} previous The result of the previous operation.
+   * @param {RequestGenerator<Prev,Req>} generator A RequestGenerator instance.
+   * @param {ResultProcessor<Res,Res2>} processor A ResultProcessor instance.
+   * @returns {Observable<Try<Res2>>} An Observable instance.
    */
   request<Prev,Res2>(
     previous: Try<Prev>,
     generator: RequestGenerator<Prev,Req>,
-    processor: ResultProcessor<Res,Res2>
+    processor: ResultProcessor<Res,Res2>,
   ): Observable<Try<Res2>>;
 }

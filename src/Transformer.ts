@@ -8,12 +8,12 @@ export namespace Transformers {
   
   /**
    * Apply transformers to an object.
-   * @param  {T|Try<T>} original The original object.
-   * @param  {Transformer<T>[]} transformers An Array of transformers.
-   * @returns Observable An Observable instance.
+   * @param {T|Try<T>} original The original object.
+   * @param {Transformer<T>[]} transformers An Array of transformers.
+   * @returns {Observable<Try<T>>} An Observable instance.
    */
   export function applyTransformers<T>(
-    original: T | Try<T>, transformers: Transformer<T>[]
+    original: T | Try<T>, transformers: Transformer<T>[],
   ): Observable<Try<T>> {
     let unwrapped = Try.unwrap(original, 'Object not available'); 
     var chain = Observable.of(unwrapped);

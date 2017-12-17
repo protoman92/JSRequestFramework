@@ -20,8 +20,8 @@ export interface Type<T extends Filterable> {
 
   /**
    * Apply middlewares.
-   * @param  {T} obj The filterable object.
-   * @returns Observable An Observable instance.
+   * @param {T} obj The filterable object.
+   * @returns {Observable<Try<T>>} An Observable instance.
    */
   applyMiddlewares(obj: T): Observable<Try<T>>;
 }
@@ -55,9 +55,9 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
 
   /**
    * Filter out unnecessary middlewares.
-   * @param  {T} obj The filterable object.
-   * @param  {Middleware<T>[]} middlewares An Array of middleware wrappers.
-   * @returns M An Array of middlewares.
+   * @param {T} obj The filterable object.
+   * @param {Middleware<T>[]} middlewares An Array of middleware wrappers.
+   * @returns {Middleware<any>[]} An Array of middlewares.
    */
   public filterMiddlewares = (obj: T, middlewares: Middleware<any>[]): Middleware<any>[] => {
     if (Filterables.isGlobalFilterable(obj)) {
@@ -88,8 +88,8 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
 
   /**
    * Apply transform middlewares.
-   * @param  {T} obj The filterable object.
-   * @returns Observable An Observable instance.
+   * @param {T} obj The filterable object.
+   * @returns {Observable<Try<T>>} An Observable instance.
    */
   public applyTransformers = (obj: T): Observable<Try<T>> => {
     let middlewares = this.filterTransforms(obj).map(value => value.middleware);
@@ -98,7 +98,7 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
 
   /**
    * Apply side effect middlewares.
-   * @param  {T} obj The filterable object.
+   * @param {T} obj The filterable object.
    */
   public applySideEffects = (obj: T): void => {
     let middlewares = this.filterSideEffects(obj).map(value => value.middleware);
@@ -107,8 +107,8 @@ export class Self<T extends Filterable> implements BuildableType<Builder<T>>, Ty
 
   /**
    * Apply middlewares.
-   * @param  {T} obj The filterable object.
-   * @returns Observable An Observable instance.
+   * @param {T} obj The filterable object.
+   * @returns {Observable<Try<T>>} An Observable instance.
    */
   public applyMiddlewares = (obj: T): Observable<Try<T>> => {
     return this.applyTransformers(obj)
