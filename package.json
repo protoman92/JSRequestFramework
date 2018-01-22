@@ -6,6 +6,8 @@
   "types": "./dist/src/index.d.ts",
   "typings": "./dist/src/index.d.ts",
   "scripts": {
+    "setup": "npm install",
+    "build": "tsc",
     "test": "tsc && jest"
   },
   "jest": {
